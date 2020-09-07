@@ -39,19 +39,19 @@ class Daemon_arp_spoofing():
         if self.verbose:
             print("Start analysis : "+datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
 
-        arp_table_start = subprocess.getoutput("arp -a")
+        arp_table_start = subprocess.getoutput("arp -n")
 
         t1 = time.time()
         d1 = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
         while 1 and self.go:
 
-            apr_t = subprocess.getoutput("arp -a")
+            apr_t = subprocess.getoutput("arp -na")
 
             if apr_t != arp_table_start:
-                print("==> Arp poisoning attack detected at " + d1)
+                syslog.syslog("Arp table changed " + d1)
                 if self.verbose:
-                    syslog.syslog("Arp poisoning attack detected at " + d1)
+                    print("==> Arp table changed " + d1)
 
             if (time.time() - t1) * 1000 < self.t:
                 # sleep the time between the time execution and the time allowed by the user
