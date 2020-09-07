@@ -1,5 +1,5 @@
 import getopt, sys
-import daemon_arp_spoofing
+from daemon_arp_spoofing import Daemon_arp_spoofing
 
 
 def main():
@@ -15,7 +15,6 @@ def main():
     verbose = False
     active = False
     output = False
-    output_file = ""
 
     for o, a in opts:
         if o in ('-t', "--time="):
@@ -34,7 +33,7 @@ def main():
             print(print_help())
             sys.exit()
 
-    d = daemon_arp_spoofing(time=time, verbose=verbose, active=active, output=output, output_file=output_file)
+    d = Daemon_arp_spoofing(time=time, verbose=verbose, active=active, output=output)
     d.run()
 
 def print_logo():
