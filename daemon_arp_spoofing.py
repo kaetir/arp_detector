@@ -3,10 +3,9 @@ from datetime import date, datetime
 import subprocess
 import syslog
 from scapy.all import sniff, ARPHDR_ETHER, ETHER_ANY, srp, conf
-from daemons.prefab import run
 
 
-class Daemon_arp_spoofing(run.RunDaemon):
+class Daemon_arp_spoofing():
     """
         active = detect all the request arp coming to change the arp table
         verbose = that results are displayed on the screen
