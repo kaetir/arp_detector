@@ -33,7 +33,7 @@ def main():
             print(print_help())
             sys.exit()
 
-    d = Daemon_arp_spoofing(time=time, verbose=verbose, active=active, output=output)
+    d = Daemon_arp_spoofing(t=time, verbose=verbose, active=active, output=output)
     d.run()
 
 def print_logo():
