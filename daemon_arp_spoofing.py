@@ -39,7 +39,7 @@ class Daemon_arp_spoofing():
         if self.verbose:
             print("Start analysis : "+datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
 
-        arp_table_start = subprocess.getoutput("arp -n")
+        arp_table_start = subprocess.getoutput("arp -na")
 
         t1 = time.time()
         d1 = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
@@ -49,6 +49,7 @@ class Daemon_arp_spoofing():
             apr_t = subprocess.getoutput("arp -na")
 
             if apr_t != arp_table_start:
+                arp_table_start = subprocess.getoutput("arp -na")
                 syslog.syslog("Arp table changed " + d1)
                 if self.verbose:
                     print("==> Arp table changed " + d1)
