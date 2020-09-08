@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import argparse
-from time import time, sleep
+from time import sleep
 from datetime import date, datetime
 from subprocess import getoutput
 from syslog import syslog
@@ -52,7 +52,6 @@ def run(t=3000, verbose=False, output=False):
     arp_table_start = getoutput("arp -n")
 
     while True:
-        t1 = time()
         d1 = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         arp_t = getoutput("arp -n")
 
@@ -63,11 +62,9 @@ def run(t=3000, verbose=False, output=False):
             if verbose:
                 print("==> Arp table changed " + d1)
 
-        if (time() - t1) < t:
-            # sleep the time between the time execution and the time allowed by the user
-            sleep(t - ((time() - t1) * 1000))
-        # raffect t1 to calculate
-        t1 = time()
+        # sleep the time between two analisys
+        sleep(t / 1000)
+        
         
 
 if __name__ == "__main__" :
