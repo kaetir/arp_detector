@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import argparse
 from time import time, sleep
 from datetime import date, datetime
