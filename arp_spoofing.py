@@ -1,74 +1,72 @@
-import getopt, sys
-from daemon_arp_spoofing import Daemon_arp_spoofing
+import argparse
+from time import time, sleep
+from datetime import date, datetime
+from subprocess import getoutput
+from syslog import syslog
 
 
 def main():
-    try:
-        opts, args = getopt.gnu_getopt(sys.argv[1:], "t:vahoV", ["time="])
-    except getopt.GetoptError as err:
-        print(err)
-        print(print_help())
-        sys.exit(2)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-v", "--verbose", help="increase output verbosity", action="store_true")
+    parser.add_argument("-V", "--version", help="print version", action="store_true")
+    parser.add_argument("-t", "--time", help="time between checks of arp table (default 3000 ms)", type=int, default=3000)
+    parser.add_argument("-o", "--output", help="output changes in syslog",  action="store_true")
+    args = parser.parse_args()
+
+    if args.version:
+        print("""arp_spoofing. Python. GNU License. V 0.1.0. 2020-09""")
+        exit()
 
     # options params
-    time = 3000
-    verbose = False
-    active = False
-    output = False
+    time = args.time
+    verbose = args.verbose
+    output = args.output
 
-    for o, a in opts:
-        if o in ('-t', "--time="):
-            time = a
-        elif o == '-v':
-            verbose = True
-        elif o == '-a':
-            active = True
-        elif o == '-o':
-            output = True
-        elif o == '-V':
-            print(print_version())
-            sys.exit()
-        elif o == '-h':
-            print(print_logo())
-            print(print_help())
-            sys.exit()
+    if not verbose and not output:
+        print("choose output or verbose please (or both)")
+        exit()
 
-    d = Daemon_arp_spoofing(t=time, verbose=verbose, active=active, output=output)
-    d.run()
+    if verbose:
+        print(print_logo())
+    
+    run(t=time, verbose=verbose, output=output)
 
 def print_logo():
     return """
- $$$$$$\                                                                       $$$$$$\  $$\                     
-$$  __$$\                                                                     $$  __$$\ \__|                    
-$$ /  $$ | $$$$$$\   $$$$$$\           $$$$$$$\  $$$$$$\   $$$$$$\   $$$$$$\  $$ /  \__|$$\ $$$$$$$\   $$$$$$\  
-$$$$$$$$ |$$  __$$\ $$  __$$\         $$  _____|$$  __$$\ $$  __$$\ $$  __$$\ $$$$\     $$ |$$  __$$\ $$  __$$\ 
-$$  __$$ |$$ |  \__|$$ /  $$ |        \$$$$$$\  $$ /  $$ |$$ /  $$ |$$ /  $$ |$$  _|    $$ |$$ |  $$ |$$ /  $$ |
-$$ |  $$ |$$ |      $$ |  $$ |         \____$$\ $$ |  $$ |$$ |  $$ |$$ |  $$ |$$ |      $$ |$$ |  $$ |$$ |  $$ |
-$$ |  $$ |$$ |      $$$$$$$  |        $$$$$$$  |$$$$$$$  |\$$$$$$  |\$$$$$$  |$$ |      $$ |$$ |  $$ |\$$$$$$$ |
-\__|  \__|\__|      $$  ____/ $$$$$$\ \_______/ $$  ____/  \______/  \______/ \__|      \__|\__|  \__| \____$$ |
-                    $$ |      \______|          $$ |                                                  $$\   $$ |
-                    $$ |                        $$ |                                                  \$$$$$$  |
-                    \__|                        \__|                                                   \______/ 
-_________________________________________________________________________________________________________________
-    """
+     #                           #####                                             
+   # #   #####  #####          #     # #####   ####   ####  ###### # #    #  ####  
+  #   #  #    # #    #         #       #    # #    # #    # #      # ##   # #    # 
+ #     # #    # #    #          #####  #    # #    # #    # #####  # # #  # #      
+ ####### #####  #####                # #####  #    # #    # #      # #  # # #  ### 
+ #     # #   #  #              #     # #      #    # #    # #      # #   ## #    # 
+ #     # #    # #               #####  #       ####   ####  #      # #    #  ####  
+                       #######                                                     
+"""
 
-def print_help():
-    return """   
-    Syntax : apr_spoofing.py [options]
-    
-    Options : 
-    --------
-    
-    -t, --time=     time before checking again arp table (default 3000 ms)
-    -v              Verbose mode (default none)
-    -a              Active analysis. Check in continue to avoid false positive (default none)
-    -V              Print the version of the software and exit
-    """
+def run(t=3000, verbose=False, output=False):
+    if verbose:
+        print("Start analysis : "+datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
 
-def print_version():
-    return """
-    arp_spoofing. Python. GNU License. V 0.1.0. 2020-09
-    """
+    arp_table_start = getoutput("arp -n")
+
+    while True:
+        t1 = time()
+        d1 = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        arp_t = getoutput("arp -n")
+
+        if arp_t != arp_table_start:
+            arp_table_start = arp_t
+            if output:
+                syslog("Arp table changed " + d1)
+            if verbose:
+                print("==> Arp table changed " + d1)
+
+        if (time() - t1) < t:
+            # sleep the time between the time execution and the time allowed by the user
+            sleep(t - ((time() - t1) * 1000))
+        # raffect t1 to calculate
+        t1 = time()
+        
 
 if __name__ == "__main__" :
     main()
