@@ -1,0 +1,16 @@
+[Unit]
+Description=Arp spoofing detection Daemon
+After=network-online.target
+ 
+[Service]
+Type=simple
+ 
+ExecStart=/opt/arp_detector/arp_change_detector.sh
+
+Restart=on-failure
+ 
+# Configures the time to wait before service is stopped forcefully.
+TimeoutStopSec=3000
+ 
+[Install]
+WantedBy=multi-user.target
