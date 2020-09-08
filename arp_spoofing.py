@@ -67,7 +67,7 @@ def print_help():
 
 def print_version():
     return """
-    arp_spoofing. Python. GNU License. V 0.0.1. 2020-09
+    arp_spoofing. Python. GNU License. V 0.1.0. 2020-09
     """
 
 if __name__ == "__main__" :
